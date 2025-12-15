@@ -16,6 +16,8 @@ builder.Services.AddCors(options => options.AddPolicy("AllowWebapp",
     .AllowAnyHeader()
     .AllowAnyMethod()));
 
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // Add Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
