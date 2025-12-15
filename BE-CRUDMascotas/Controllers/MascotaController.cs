@@ -100,6 +100,7 @@ namespace BE_CRUDMascotas.Controllers
             try
             {
                 var mascota = _mapper.Map<Mascota>(mascotaDto);
+
                 if (id != mascota.Id)
                 {
                     return BadRequest();
