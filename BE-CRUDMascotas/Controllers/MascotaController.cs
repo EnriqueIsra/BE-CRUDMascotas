@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BE_CRUDMascotas.Models;
 using BE_CRUDMascotas.Models.DTO;
+using BE_CRUDMascotas.Models.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,20 +12,21 @@ namespace BE_CRUDMascotas.Controllers
     [ApiController]
     public class MascotaController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IMascotaRepository _mascotaRepository;
 
-        public MascotaController(ApplicationDbContext context, IMapper mapper)
+        public MascotaController(IMapper mapper, IMascotaRepository mascotaRepository)
         {
-            _context = context;
             _mapper = mapper;
+            _mascotaRepository = mascotaRepository;
         }
+
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             try
             {
-                var listMascotas = await _context.Mascotas.ToListAsync();
+                var listMascotas = await _mascotaRepository.GetListMascotas();
                 var listMascotasDto = _mapper.Map<IEnumerable<MascotaDTO>>(listMascotas);
                 return Ok(listMascotas);
             } catch(Exception ex)
@@ -38,7 +40,7 @@ namespace BE_CRUDMascotas.Controllers
         {
             try
             {
-                var mascota = await _context.Mascotas.FindAsync(id);
+                var mascota = await _mascotaRepository.GetMascotaById(id);
 
                 if (mascota == null)
                 {
@@ -60,13 +62,12 @@ namespace BE_CRUDMascotas.Controllers
         {
             try
             {
-                var mascota = await _context.Mascotas.FindAsync(id);
+                var mascota = await _mascotaRepository.GetMascotaById(id);
                 if (mascota == null)
                 {
                     return NotFound();
                 }
-                _context.Mascotas.Remove(mascota);
-                await _context.SaveChangesAsync();
+                await _mascotaRepository.DeleteMascota(mascota);
                 return NoContent();
             }
             catch (Exception ex)
@@ -82,8 +83,7 @@ namespace BE_CRUDMascotas.Controllers
                 var mascota = _mapper.Map<Mascota>(mascotaDto);
 
                 mascota.FechaCreacion = DateTime.Now;
-                _context.Add(mascota);
-                await _context.SaveChangesAsync();
+                mascota = await _mascotaRepository.AddMascota(mascota);
 
                 var mascotaItemDto = _mapper.Map<MascotaDTO>(mascota);
 
@@ -105,18 +105,15 @@ namespace BE_CRUDMascotas.Controllers
                 {
                     return BadRequest();
                 }
-                var mascotaItem = await _context.Mascotas.FindAsync(id);
+
+                var mascotaItem = await _mascotaRepository.GetMascotaById(id);
+
                 if (mascotaItem == null)
                 {
                     return NotFound();
                 }
-                mascotaItem.Nombre = mascota.Nombre;
-                mascotaItem.Raza = mascota.Raza;
-                mascotaItem.Edad = mascota.Edad;
-                mascotaItem.Peso = mascota.Peso;
-                mascotaItem.Color = mascota.Color;
 
-                await _context.SaveChangesAsync();
+                await _mascotaRepository.UpdateMascota(mascota);
 
                 return NoContent();
             }
