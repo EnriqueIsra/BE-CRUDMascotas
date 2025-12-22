@@ -28,7 +28,7 @@ namespace BE_CRUDMascotas.Controllers
             {
                 var listMascotas = await _mascotaRepository.GetListMascotas();
                 var listMascotasDto = _mapper.Map<IEnumerable<MascotaDTO>>(listMascotas);
-                return Ok(listMascotas);
+                return Ok(listMascotasDto);
             } catch(Exception ex)
             {
                 return BadRequest(ex.Message);
